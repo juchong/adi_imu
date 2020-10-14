@@ -1,2 +1,2 @@
-# ADcmXL3021-Teensy-Example
-A boilerplate Teensyduino example for the ADcmXL3021 Machine Health Monitoring Sensor
+# iSensor-Teensy-Examples
+A boilerplate Teensyduino library and examples for several iSensor IMU and vibration sensor products. 
