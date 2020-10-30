@@ -17,12 +17,6 @@ extern "C" {
 #endif /* _LANGUAGE_C */
 
 #include "adi_imu_conf.h"
-#include "spi_driver.h"
-
-/* Static defines */
-#define SPI_BUFF_SIZE 64
-//static uint8_t tx_buff[SPI_BUFF_SIZE]
-//static uint8_t rx_buff[SPI_BUFF_SIZE]
 
 /* Enable the specified family header */
 #if ADIS1646x
@@ -152,10 +146,6 @@ typedef struct {
     int32_t baro;
 #endif
 } adi_imu_UnscaledData;
-
-extern int32_t spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen, uint32_t stall);
-extern void delay_US(uint32_t microseconds);
-extern void delay_MS(uint32_t milliseconds);
 
 /* Initialization routine */
 adi_imu_Status adi_imu_Init();

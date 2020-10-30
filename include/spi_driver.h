@@ -8,11 +8,11 @@
 #ifndef __SPI_DRIVER_H_
 #define __SPI_DRIVER_H_
 
-#include "adi_imu_conf.h"
 #include "adi_imu.h"
+#include "adi_imu_conf.h"
 
 /* Generic SPI transfer function */
-int32_t spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen, uint32_t stall);
+adi_imu_Status spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen, uint32_t stall);
 
 /* Generic microsecond delay function */
 void delay_US(uint32_t microseconds);

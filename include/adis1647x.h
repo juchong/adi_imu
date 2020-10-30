@@ -19,6 +19,7 @@
 #define SUPPORTS_EXTERNAL_SYNC                  1
 #define SUPPORTS_ARBITRARY_DEC_RATE             1
 #define SUPPORTS_RANGE_REG                      1
+#define MINIMUM_US_STALL_TIME                   16
 
 /* Component-specific register locations */
 #define SCRATCH_REG                             USER_SCR1
