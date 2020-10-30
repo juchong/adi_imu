@@ -1,2 +1,2 @@
-# iSensor-Teensy-Examples
-A boilerplate Teensyduino library and examples for several iSensor IMU and vibration sensor products. 
+# adi_imu
+A generic interface library for most modern iSensor IMU families.    
