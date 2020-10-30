@@ -12,6 +12,7 @@
                                       |   This byte is the register address
                                       This byte is the page ID
 */
+/* NOTE: Use 0x00 for the page ID if the IMU does not support paged addresses. */
 
 // User Register Memory Map from Table 6
 #define FLASH_CNT   	0x0000  //Flash memory write count
@@ -30,7 +31,7 @@
 #define Z_ACCL_OUT  	0x001A  //Z-axis accelerometer output, upper word
 #define TEMP_OUT    	0x001C  //Temperature output (internal, not calibrated)
 #define TIME_STAMP  	0x001E  //PPS mode time stamp
-#define DATA_CNTR       0x0022  //New data counter
+#define DATA_CNTR     0x0022  //New data counter
 #define X_DELTANG_LOW	0x0024  //X-axis delta angle output, lower word
 #define X_DELTANG_OUT	0x0026  //X-axis delta angle output, upper word
 #define Y_DELTANG_LOW	0x0028  //Y-axis delta angle output, lower word
@@ -65,9 +66,9 @@
 #define FIRM_DM    		0x006E  //Firmware revision date, month and day
 #define FIRM_Y    		0x0070  //Firmware revision date, year
 #define PROD_ID    		0x0072  //Product identification 
-#define SERIAL_NUM      0x0074  //Serial number (relative to assembly lot)
+#define SERIAL_NUM    0x0074  //Serial number (relative to assembly lot)
 #define USER_SCR1    	0x0076  //User scratch register 1 
 #define USER_SCR2    	0x0078  //User scratch register 2 
 #define USER_SCR3    	0x007A  //User scratch register 3 
-#define FLSHCNT_LOW     0x007C  //Flash update count, lower word 
-#define FLSHCNT_HIGH    0x007E  //Flash update count, upper word 
+#define FLSHCNT_LOW   0x007C  //Flash update count, lower word 
+#define FLSHCNT_HIGH  0x007E  //Flash update count, upper word 

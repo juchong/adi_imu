@@ -19,61 +19,19 @@ extern "C" {
 #include "adi_imu_conf.h"
 #include "spi_driver.h"
 
-extern int spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint32_t stall);
-extern void delay_US(uint32_t microseconds);
-extern void delay_MS(uint32_t milliseconds);
-
-/* Initialization routine */
-int adi_imu_Init();
-
-/* Write to IMU register */
-int adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val);
-
-/* Read several IMU registers at once */
-int adi_imu_ReadRegArray(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen);
-
-/* Read a single IMU register */
-uint16_t adi_imu_ReadReg(uint16_t pageIDRegAddr);
-
-/* Execute a flash update */
-int adi_imu_FlashUpdate();
-
-/* Execute a software reset */
-int adi_imu_SoftwareReset();
-
-/* Configure the sensor data rate */
-int adi_imu_SetDataRate(uint16_t dataRate);
-
-/* Check SPI communication */
-int adi_imu_CheckComs();
-
-/* Update device info/state */
-int adi_imu_GetDeviceInfo();
-
-/* Set the active register page */
-int adi_imu_SetActivePage(uint16_t page);
-
-/* Get the active register page */
-int adi_imu_GetActivePage();
-
-/* Trigger a read of the inertial data */
-int adi_imu_GetSensorData();
-
-typedef enum {
-    FALSE = 0,
-    TRUE = 1
-} adi_imu_Boolean;
-
+/* IMU polarity typedef */
 typedef enum {
     NEGATIVE = 0,
     POSITIVE = 1
 } adi_imu_Polarity;
 
+/* Signal edge typedef */
 typedef enum {
     FALLING_EDGE = 0,
     RISING_EDGE = 1
 } adi_imu_EdgeType;
 
+/* Data-ready GPIO typedef */
 typedef enum {
     DIO1 = 0,
     DIO2 = 1,
@@ -87,6 +45,7 @@ typedef enum {
     PPS = 2
 } adi_imu_ClkMode;
 
+/* IMU device information struct */
 typedef struct {
     uint16_t prodId;
     uint16_t fwRev;
@@ -101,71 +60,94 @@ typedef struct {
 
 /** Enum of library errors */
 typedef enum {
-    adi_imu_InvalidDataRate_e = -4,
-    adi_imu_IncorrectRange_e = -3,
-    adi_imu_ProdIdVerifyFailed_e = -2,
-    adi_imu_RwFailed_e = -1,
-    adi_imu_Success_e = 0,
-} adi_imu_Error;
+    ADI_IMU_SUCCESS = 0,                    /* (0) Success/No Error */
+    ADI_IMU_SPIRW_FAILED,                   /* (1) SPI read/write failed */
+    ADI_IMU_PRODID_VERIFY_FAILED,           /* (2) Product ID read from the device does not match the compiled library */
+    ADI_IMU_INVALID_DATA_RATE,              /* (3) An invalid data rate was requested */
+} adi_imu_Status;
 
+/* Scaled data struct */
+#if ENABLE_SCALED_DATA
 typedef struct {
-    int16_t xg;
-    int16_t yg;
-    int16_t zg;
-    int16_t xa;
-    int16_t ya;
-    int16_t za;
+    float xg;
+    float yg;
+    float zg;
+    float xa;
+    float ya;
+    float za;
+    float temperature;
+#if MAGNETOMETER_EN
+    float xm;
+    float ym;
+    float zm;
+#endif
+#if BAROMETER_EN
+    float baro;
+#endif
+    } adi_imu_ScaledData;
+#endif
+
+/* Unscaled data struct */
+typedef struct {
+    int32_t xg;
+    int32_t yg;
+    int32_t zg;
+    int32_t xa;
+    int32_t ya;
+    int32_t za;
     int16_t temperature;
-} adi_imu_GyroAccel16BitData;
-
-#ifdef SCALED_DATA_EN
-    typedef struct {
-        double xg;
-        double yg;
-        double zg;
-        double xa;
-        double ya;
-        double za;
-        double temperature;
-    } adi_imu_GyroAccel16BitDataScaled;
+#if MAGNETOMETER_EN
+    int16_t xm;
+    int16_t ym;
+    int16_t zm;
 #endif
-
-#ifdef USE_32BIT
-    typedef struct {
-        int32_t xg;
-        int32_t yg;
-        int32_t zg;
-        int32_t xa;
-        int32_t ya;
-        int32_t za;
-        int16_t temperature;
-    } adi_imu_GyroAccel32BitData;
-    #ifdef SCALED_DATA_EN
-    typedef struct {
-        double xg;
-        double yg;
-        double zg;
-        double xa;
-        double ya;
-        double za;
-        double temperature;
-    } adi_imu_GyroAccel32BitDataScaled;
-    #endif
+#if BAROMETER_EN
+    int16_t baro;
 #endif
+} adi_imu_UnscaledData;
 
-#ifdef MAGNETOMETER_EN
-    typedef struct {
-        int16_t xm;
-        int16_t ym;
-        int16_t zm;
-    } adi_imu_MagData;
-#endif
+extern int32_t spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen, uint32_t stall);
+extern void delay_US(uint32_t microseconds);
+extern void delay_MS(uint32_t milliseconds);
 
-#ifdef BAROMETER_EN
-    typedef struct {
-        int16_t baro;
-    } adi_imu_BaroData;
-#endif
+/* Initialization routine */
+adi_imu_Status adi_imu_Init();
+
+/* Write to IMU register */
+adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val);
+
+/* Read several IMU registers at once */
+adi_imu_Status adi_imu_ReadRegArray(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen);
+
+/* Read a single IMU register */
+uint16_t adi_imu_ReadReg(uint16_t pageIDRegAddr);
+
+/* Execute a flash update */
+adi_imu_Status adi_imu_FlashUpdate();
+
+/* Execute a software reset */
+adi_imu_Status adi_imu_SoftwareReset();
+
+/* Configure the sensor data rate */
+adi_imu_Status adi_imu_SetDataRate(uint16_t dataRate);
+
+/* Check SPI communication */
+adi_imu_Status adi_imu_CheckComs();
+
+/* Update device info/state */
+adi_imu_Status adi_imu_GetDeviceInfo(adi_imu_DeviceInfo *data_info);
+
+/* Set the active register page */
+adi_imu_Status adi_imu_SetActivePage(uint16_t page);
+
+/* Get the active register page */
+int32_t adi_imu_GetActivePage();
+
+/* Trigger a read of the inertial data and populate the scaled data struct */
+adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct);
+
+/* Trigger a read of the inertial data and populate the unscaled data struct */
+adi_imu_Status adi_imu_GetUnscaledSensorData(adi_imu_UnscaledData *data_struct);
 
 #ifdef __cplusplus
 }

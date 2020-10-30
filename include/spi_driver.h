@@ -11,12 +11,12 @@
 #include "adi_imu.h"
 
 /* Generic SPI transfer function */
-static int spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint32_t stall);
+int32_t spi_Transfer(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen, uint32_t stall);
 
 /* Generic microsecond delay function */
-static void delay_US(uint32_t microseconds);
+void delay_US(uint32_t microseconds);
 
 /* Generic millisecond delay function */
-static void delay_MS(uint32_t milliseconds);
+void delay_MS(uint32_t milliseconds);
 
 #endif
