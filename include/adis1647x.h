@@ -57,16 +57,16 @@
     #define BURST_BYTE_LENGTH                   20
 
     /* Burst message definition */
-    #define DIAG_STAT                           0
+    #define DIAG_STAT_INDEX                     0
     #define XG_INDEX                            1
     #define YG_INDEX                            2
     #define ZG_INDEX                            3
     #define XA_INDEX                            4
     #define YA_INDEX                            5
     #define ZA_INDEX                            6
-    #define TEMP_OUT                            7
-    #define DATA_CNTR                           8
-    #define CHECKSUM                            9
+    #define TEMP_OUT_INDEX                      7
+    #define DATA_CNTR_INDEX                     8
+    #define CHECKSUM_INDEX                      9
   #endif
 #endif
 
