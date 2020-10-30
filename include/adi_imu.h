@@ -108,6 +108,30 @@ typedef struct {
     } adi_imu_ScaledData;
 #endif
 
+/* Target 16-bit scale factors */
+typedef struct {
+    float gyro16Scale;
+    float accel16Scale;
+    #if ENABLE_MAGNETOMETER
+        float magScale;
+    #endif
+    #if ENABLE_BAROMETER
+        float baroScale;
+    #endif
+} adi_imu_16Bit_ScaleFactors;
+
+/* Target 32-bit scale factors */
+typedef struct {
+    float gyro32Scale;
+    float accel32Scale;
+    #if ENABLE_MAGNETOMETER
+        float magScale;
+    #endif
+    #if ENABLE_BAROMETER
+        float baroScale;
+    #endif
+} adi_imu_32Bit_ScaleFactors;
+
 /* Unscaled data struct */
 typedef struct {
     int32_t xg;

@@ -38,11 +38,11 @@
 #endif
 
 /* Component-specific scale factors */
-#define GYRO_16BIT_SCALE_125                    160
-#define GYRO_16BIT_SCALE_500                    40
-#define GYRO_16BIT_SCALE_2000                   10
-#define ACCEL_16BIT_SCALE_8G                    4000
-#define ACCEL_16BIT_SCALE_40G                   800
+#define GYRO_16BIT_SCALE_125                    (float) 160
+#define GYRO_16BIT_SCALE_500                    (float) 40
+#define GYRO_16BIT_SCALE_2000                   (float) 10
+#define ACCEL_16BIT_SCALE_8G                    (float) 4000
+#define ACCEL_16BIT_SCALE_40G                   (float) 800
 
 #define GYRO_32BIT_SCALE_125                    (float) 10485760
 #define GYRO_32BIT_SCALE_500                    (float) 2621440
