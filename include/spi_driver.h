@@ -8,6 +8,7 @@
 #ifndef __SPI_DRIVER_H_
 #define __SPI_DRIVER_H_
 
+#include "adi_imu_conf.h"
 #include "adi_imu.h"
 
 /* Generic SPI transfer function */

@@ -24,6 +24,20 @@ extern "C" {
 //static uint8_t tx_buff[SPI_BUFF_SIZE]
 //static uint8_t rx_buff[SPI_BUFF_SIZE]
 
+/* Enable the specified family header */
+#if ADIS1646x
+    #include "adis1646x.h" /* ADIS16465, ADIS16467 */
+#endif
+#if ADIS1647X
+    #include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
+#endif
+#if ADIS1649X
+    #include "adis1649x.h" /* ADIS16495, ADIS16497 */
+#endif
+#if ADIS1650X
+    #include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
+#endif
+
 /* IMU polarity typedef */
 typedef enum {
     NEGATIVE = 0,

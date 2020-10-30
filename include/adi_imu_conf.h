@@ -6,10 +6,10 @@
  **/
 
 /* IMU family selection. Uncomment the target IMU family to build in support. Only one device should be selected at a time! */
-//#include "adis1646x.h" /* ADIS16465, ADIS16467 */
-#include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
-//#include "adis1649x.h" /* ADIS16495, ADIS16497 */
-//#include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
+//#define ADIS1646X             1
+#define ADIS1647X             1
+//#define ADIS1649X             1
+//#define ADIS1650X             1
 
 /* Compile support for data scaling? */
 #define ENABLE_SCALED_DATA    1
