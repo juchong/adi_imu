@@ -50,6 +50,9 @@
 #define ACCEL_32BIT_SCALE_8G                    (float) 262144000
 #define ACCEL_32BIT_SCALE_40G                   (float) 52428800
 
+#define TEMPERATURE_SCALE                       (float) 10
+#define TEMPERATURE_OFFSET                      (float) 0
+
 /* Burst mode-specific definitions */
 #if ENABLE_BURST_MODE
   #if SUPPORTS_BURST
@@ -78,7 +81,7 @@
 #define BITP_MISC_CTRL_REG_DR_POLARITY          0
 #define BITM_MISC_CTRL_REG_LIN_G_COMP           (1 << BITP_MISC_CTRL_REG_LIN_G_COMP)
 #define BITM_MISC_CTRL_REG_POP_COMP             (1 << BITP_MISC_CTRL_REG_POP_COMP)
-#define BITM_MISC_CTRL_REG_SYNC_FUNCTION        (3 << BITP_MISC_CTRL_REG_SYNC_FUNCTION)
+#define BITM_MISC_CTRL_REG_SYNC_FUNCTION        (7 << BITP_MISC_CTRL_REG_SYNC_FUNCTION)
 #define BITM_MISC_CTRL_REG_SYNC_POLARITY        (1 << BITP_MISC_CTRL_REG_SYNC_POLARITY)
 #define BITM_MISC_CTRL_REG_DR_POLARITY          (1 << BITP_MISC_CTRL_REG_DR_POLARITY)
 

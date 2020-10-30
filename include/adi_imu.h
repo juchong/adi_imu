@@ -112,6 +112,7 @@ typedef struct {
 typedef struct {
     float gyro16Scale;
     float accel16Scale;
+    float tempScale;
     #if ENABLE_MAGNETOMETER
         float magScale;
     #endif
@@ -124,6 +125,7 @@ typedef struct {
 typedef struct {
     float gyro32Scale;
     float accel32Scale;
+    float tempScale;
     #if ENABLE_MAGNETOMETER
         float magScale;
     #endif
