@@ -1,6 +1,6 @@
 /**
-  * @file		spi_driver.h
-  * @date		10/29/2020
+  * @file		  spi_driver.h
+  * @date		  10/29/2020
   * @author		Juan Chong (juan.chong@analog.com)
   * @brief		Generic SPI driver to be implemented for the target platform.
  **/

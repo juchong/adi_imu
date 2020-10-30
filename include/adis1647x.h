@@ -1,12 +1,37 @@
 /**
-  * @file		adis1647x.h
-  * @date		10/29/2020
+  * @file		  adis1647x.h
+  * @date		  10/29/2020
   * @author		Juan Chong (juan.chong@analog.com)
   * @brief		ADIS1647x register map and configuration file.
  **/
 
-/* #define [15:8] = page id, [7:0] = reg addr */
-/* Example: REG_PAGE_ID 0x0000 -> 0x  00  00
+/* Device and family-specific definitions and configurations */
+#define ENABLE_MAGNETOMETER               0
+#define ENABLE_BAROMETER                  0
+#define SUPPORTS_32BIT                    1
+#define SUPPORTS_BURST                    1
+#define SUPPORTS_PAGED_ADDRESSES          0
+#define MAX_DATA_RATE                     2000
+#define SUPPORTS_PPS                      1
+#define SUPPORTS_EXTERNAL_SYNC            1
+#define SUPPORTS_ARBITRARY_DEC_RATE       1
+#define SUPPORTS_RANGE_REG                1
+
+/* Component-specific register locations */
+#define SCRATCH_REG                       0x0076
+#define FIRMWARE_REV_REG                  0x006C
+#define FIRMWARE_DATE_MONTH_REG           0x006E
+#define FIRMWARE_YEAR_REG                 0x0070
+#define PRODUCT_ID_REG                    0x0072
+#define SERIAL_NUMBER_REG                 0x0074
+#define COMMAND_REG                       0x0068
+#if SUPPORTS_RANGE_REG
+  #define RANGE_REG                       0x005E
+#endif
+
+
+/* [15:8] = page id, [7:0] = reg addr */
+/* Example: TEMP_OUT 0x001C ->   0x   00  1C
                                       ^   ^
                                       |   |   
                                       |   This byte is the register address

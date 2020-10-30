@@ -1,5 +1,5 @@
 /**
-  * @file		adi_imu.h
+  * @file	    adi_imu.h
   * @date		10/29/2020
   * @author		Juan Chong (juan.chong@analog.com)
   * @brief		Global adi_imu driver defines.
@@ -18,6 +18,11 @@ extern "C" {
 
 #include "adi_imu_conf.h"
 #include "spi_driver.h"
+
+/* Static defines */
+#define SPI_BUFF_SIZE 64
+//static uint8_t tx_buff[SPI_BUFF_SIZE]
+//static uint8_t rx_buff[SPI_BUFF_SIZE]
 
 /* IMU polarity typedef */
 typedef enum {
@@ -39,10 +44,11 @@ typedef enum {
     DIO4 = 3
 } adi_imu_DatRdyGPIO;
 
+/* IMU clock mode */
 typedef enum {
-    INTRNL = 0,
-    SYNC = 1,
-    PPS = 2
+    INTERNAL_SYNC = 0,
+    DIRECT_SYNC = 1,
+    SCALED_SYNC = 2
 } adi_imu_ClkMode;
 
 /* IMU device information struct */
@@ -64,6 +70,7 @@ typedef enum {
     ADI_IMU_SPIRW_FAILED,                   /* (1) SPI read/write failed */
     ADI_IMU_PRODID_VERIFY_FAILED,           /* (2) Product ID read from the device does not match the compiled library */
     ADI_IMU_INVALID_DATA_RATE,              /* (3) An invalid data rate was requested */
+    ADI_IMU_BURST_NOT_SUPPORTED,            /* (4) The selected IMU configuration does not support burst data capture */
 } adi_imu_Status;
 
 /* Scaled data struct */
@@ -76,12 +83,12 @@ typedef struct {
     float ya;
     float za;
     float temperature;
-#if MAGNETOMETER_EN
+#if ENABLE_MAGNETOMETER
     float xm;
     float ym;
     float zm;
 #endif
-#if BAROMETER_EN
+#if ENABLE_BAROMETER
     float baro;
 #endif
     } adi_imu_ScaledData;
@@ -95,14 +102,14 @@ typedef struct {
     int32_t xa;
     int32_t ya;
     int32_t za;
-    int16_t temperature;
-#if MAGNETOMETER_EN
-    int16_t xm;
-    int16_t ym;
-    int16_t zm;
+    int32_t temperature;
+#if ENABLE_MAGNETOMETER
+    int32_t xm;
+    int32_t ym;
+    int32_t zm;
 #endif
-#if BAROMETER_EN
-    int16_t baro;
+#if ENABLE_BAROMETER
+    int32_t baro;
 #endif
 } adi_imu_UnscaledData;
 
@@ -117,7 +124,7 @@ adi_imu_Status adi_imu_Init();
 adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val);
 
 /* Read several IMU registers at once */
-adi_imu_Status adi_imu_ReadRegArray(uint16_t *txBuf, uint16_t *rxBuf, uint16_t xferLen, uint16_t wordLen);
+adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs);
 
 /* Read a single IMU register */
 uint16_t adi_imu_ReadReg(uint16_t pageIDRegAddr);
@@ -147,7 +154,7 @@ int32_t adi_imu_GetActivePage();
 adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct);
 
 /* Trigger a read of the inertial data and populate the unscaled data struct */
-adi_imu_Status adi_imu_GetUnscaledSensorData(adi_imu_UnscaledData *data_struct);
+adi_imu_Status adi_imu_GetSensorData(adi_imu_UnscaledData *data_struct);
 
 #ifdef __cplusplus
 }
