@@ -36,6 +36,19 @@ adi_imu_Status adi_imu_Init()
     return status;
 }
 
+/** 
+ * @brief Read a single register from the IMU
+ * 
+ * @param pageIDRegAddr The register location to be written to
+ * 
+ * @param val The data to be written to the sensor
+ * 
+ * @return A status code indicating the success of the SPI transaction
+ * 
+ * This function writes a 16-bit word (split into two 8-bit bytes) into the requested register
+ * location and the adjacent location. If support for paged IMUs is compiled, a write 
+ * to PAGE_ID is automatically appended to the transaction. 
+ **/
 adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val)
 {
 
@@ -62,6 +75,19 @@ adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val)
     return status;
 }
 
+/** 
+ * @brief Read a single register from the IMU
+ * 
+ * @param pageIDRegAddr The register localtion to be read from
+ * 
+ * @param val A pointer to the data read back from the sensor
+ * 
+ * @return A status code indicating the success of the SPI transaction
+ * 
+ * This function reads a register location and places the resultant data in the location
+ * provided. If support for paged IMUs is compiled, a write to PAGE_ID is automatically appended
+ * to the transaction. 
+ **/
 adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val)
 {
 
@@ -108,7 +134,8 @@ adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val)
  * requested register list. The list is processed in the order the registers are stored within the array. 
  * If support for paged IMUs is compiled and the register list contains registers located on
  * different pages, writes to the PAGE_ID register are automatically inserted in the SPI transaction. 
- * Any extra SPI writes are automatically parsed out of the resultant data array.
+ * A page write is always inserted at the beginning of the array read. Any extra SPI writes are automatically 
+ * parsed out of the resultant data array.
  **/
 adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs)
 {
