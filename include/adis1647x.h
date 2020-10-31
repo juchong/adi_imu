@@ -13,13 +13,13 @@
 #define ENABLE_BAROMETER                        0
 #define SUPPORTS_32BIT                          1
 #define SUPPORTS_BURST                          1
-#define SUPPORTS_PAGED_ADDRESSES                0
+#define SUPPORTS_PAGES                          0
 #define MAX_DATA_RATE                           2000
 #define SUPPORTS_PPS                            1
 #define SUPPORTS_EXTERNAL_SYNC                  1
 #define SUPPORTS_ARBITRARY_DEC_RATE             1
 #define SUPPORTS_RANGE_REG                      1
-#define MINIMUM_US_STALL_TIME                   16
+#define STALL_TIME_US                           16
 
 /* Component-specific register locations */
 #define SCRATCH_REG                             USER_SCR1

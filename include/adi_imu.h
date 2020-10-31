@@ -18,19 +18,24 @@ extern "C" {
 
 #include "adi_imu_conf.h"
 
-/* Enable the specified family header */
-#if ADIS1646x
+/* Enable the user-specified IMU header */
+#if ADIS16448
+    #include "adis16448.h" /* ADIS16448 */
+#elif ADIS1646X
     #include "adis1646x.h" /* ADIS16465, ADIS16467 */
-#endif
-#if ADIS1647X
+#elif ADIS1647X
     #include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
-#endif
-#if ADIS1649X
+#elif ADIS1649X
     #include "adis1649x.h" /* ADIS16495, ADIS16497 */
-#endif
-#if ADIS1650X
+#elif ADIS1650X
     #include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
 #endif
+
+/* Boolean typedef */
+typedef enum {
+    FALSE = 0,
+    TRUE = 1
+} adi_imu_Boolean;
 
 /* IMU polarity typedef */
 typedef enum {
@@ -103,6 +108,7 @@ typedef struct {
 #endif
 
 /* Target 16-bit scale factors */
+#if ENABLE_SCALED_DATA
 typedef struct {
     float gyro16Scale;
     float accel16Scale;
@@ -114,19 +120,26 @@ typedef struct {
         float baroScale;
     #endif
 } adi_imu_16Bit_ScaleFactors;
+#endif
 
 /* Target 32-bit scale factors */
-typedef struct {
-    float gyro32Scale;
-    float accel32Scale;
-    float tempScale;
-    #if ENABLE_MAGNETOMETER
-        float magScale;
+#if ENABLE_SCALED_DATA
+    #if SUPPORTS_32BIT
+        #if ENABLE_32BIT_DATA
+        typedef struct {
+            float gyro32Scale;
+            float accel32Scale;
+            float tempScale;
+            #if ENABLE_MAGNETOMETER
+                float magScale;
+            #endif
+            #if ENABLE_BAROMETER
+                float baroScale;
+            #endif
+        } adi_imu_32Bit_ScaleFactors;
+        #endif
     #endif
-    #if ENABLE_BAROMETER
-        float baroScale;
-    #endif
-} adi_imu_32Bit_ScaleFactors;
+#endif
 
 /* Unscaled data struct */
 typedef struct {
@@ -157,7 +170,7 @@ adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val);
 adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs);
 
 /* Read a single IMU register */
-uint16_t adi_imu_ReadReg(uint16_t pageIDRegAddr);
+adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val);
 
 /* Execute a flash update */
 adi_imu_Status adi_imu_FlashUpdate();
@@ -178,7 +191,7 @@ adi_imu_Status adi_imu_GetDeviceInfo(adi_imu_DeviceInfo *data_info);
 adi_imu_Status adi_imu_SetActivePage(uint16_t page);
 
 /* Get the active register page */
-int32_t adi_imu_GetActivePage();
+adi_imu_Status adi_imu_GetActivePage(uint16_t *active_page);
 
 /* Trigger a read of the inertial data and populate the scaled data struct */
 adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct);

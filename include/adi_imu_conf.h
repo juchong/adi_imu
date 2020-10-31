@@ -14,30 +14,37 @@
   * IMU family selection. Uncomment the target IMU family to build in support. 
   * Only one device should be selected at a time!
  **/
-//#define ADIS1646X             1
-#define ADIS1647X             1
-//#define ADIS1649X             1
-//#define ADIS1650X             1
+//#define ADIS16448                         1
+//#define ADIS1646X                         1
+#define ADIS1647X                         1
+//#define ADIS1649X                         1
+//#define ADIS1650X                         1
+
+
+/**
+ * Enable reading IMU data in 32-bit format if the IMU supports it.
+ **/
+#define ENABLE_32BIT_DATA                 1
 
 
 /**
   * Enable compiling floating-point operations. 
   * Adds support for applying scale factors to IMU data.
  **/
-#define ENABLE_SCALED_DATA    1
+#define ENABLE_SCALED_DATA                1
 
 
 /**
-  * Enable using burst read mode to access sensor data?
-  * Does not affect discreet register reads/writes.
+ * Enable using burst read mode to access sensor data?
+ * Does not affect discreet register reads/writes.
  **/
-#define ENABLE_BURST_MODE     1
+#define ENABLE_BURST_MODE                 1
 
 
 /**
-  * Set the tx and rx buffer size. Used for managing SPI transactions.
+ * Set the tx and rx buffer size. Used for managing SPI transactions.
  **/
-#define SPI_BUFF_SIZE 64
+#define SPI_BUFF_SIZE                     64
 
 
 #endif
