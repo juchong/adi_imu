@@ -31,7 +31,7 @@
 #define COMMAND_REG                             GLOB_CMD
 #define MISC_CTRL_REG                           MSC_CTRL
 #define DECIMATE_REG                            DEC_RATE
-#if SUPPORTS_PAGED_ADDRESSES
+#if SUPPORTS_PAGES
   #define PAGE_ID_REG                           PAGE_ID
 #endif
 #if SUPPORTS_RANGE_REG
