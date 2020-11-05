@@ -14,12 +14,24 @@
  * IMU family selection. Uncomment the target IMU family to build in support. 
  * Only one device should be selected at a time!
  **/
-//#include "adis16448.h"      /* ADIS16448 */
-//#include "adis1646x.h"      /* ADIS16465, ADIS16467 */
-#include "adis1647x.h"        /* ADIS16470, ADIS16475, ADIS16477 */
-//#include "adis1649x.h"      /* ADIS16495, ADIS16497 */
-//#include "adis1650x.h"      /* ADIS16500, ADIS16505, ADIS16507 */
+//#define ADIS16448                         1
+//#define ADIS1646X                         1
+#define ADIS1647X                         1
+//#define ADIS1649X                         1
+//#define ADIS1650X                         1
 
+/* Enable the user-specified IMU header */
+#if ADIS16448
+    #include "adis16448.h" /* ADIS16448 */
+#elif ADIS1646X
+    #include "adis1646x.h" /* ADIS16465, ADIS16467 */
+#elif ADIS1647X
+    #include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
+#elif ADIS1649X
+    #include "adis1649x.h" /* ADIS16495, ADIS16497 */
+#elif ADIS1650X
+    #include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
+#endif
 
 /**
  * Enable reading IMU data in 32-bit format if the IMU supports it.

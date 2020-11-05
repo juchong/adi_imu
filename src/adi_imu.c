@@ -52,6 +52,7 @@ adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val)
     /* Append page write to message */
     txBuf[0] = (0x80 | PAGE_ID_REG & 0xFF);
     txBuf[1] = ((pageIDRegAddr >> 8) & 0xFF);
+    /* Prepare the tx buffer */
     txBuf[2] = (0x80 | (pageIDRegAddr & 0xFF));
     txBuf[3] = (val & 0xFF);
     txBuf[4] = (0x80 | ((pageIDRegAddr & 0xFF) + 1));
@@ -59,7 +60,7 @@ adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val)
     /* Transmit tx buffer */
     status = spi_Transfer(txBuf, rxBuf, 6, 16, STALL_TIME_US);
 #else
-    /* Prepare transmit buffer */
+    /* Prepare the tx buffer */
     txBuf[0] = (0x80 | (pageIDRegAddr & 0xFF));
     txBuf[1] = (val & 0xFF);
     txBuf[2] = (0x80 | ((pageIDRegAddr & 0xFF) + 1));
@@ -92,6 +93,7 @@ adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val)
     /* Append page write to message */
     txBuf[0] = (0x80 | PAGE_ID_REG & 0xFF);
     txBuf[1] = ((pageIDRegAddr >> 8) & 0xFF);
+    /* Prepare the tx buffer */
     txBuf[2] = (pageIDRegAddr & 0xFF);
     txBuf[3] = 0x00;
     txBuf[4] = 0x00;
@@ -259,7 +261,7 @@ adi_imu_Status adi_imu_FlashUpdate()
 /** 
  * @brief Executes the IMU software reset routine.
  * 
- * @return A status code indicating the success of the SPI transaction
+ * @return A status code indicating the success of the SPI transaction.
  * 
  * This function writes the correct bit into the IMU command register to trigger a software reset. 
  **/
@@ -279,13 +281,22 @@ adi_imu_Status adi_imu_SoftwareReset()
     return status;
 }
 
+/** 
+ * @brief Sets the IMU data output rate.
+ * 
+ * @return A status code indicating the success of the SPI transaction.
+ * 
+ * This function performs the necessary calculations and writes the value to the decimation register.
+ **/
 adi_imu_Status adi_imu_SetDataRate(uint16_t dataRate)
 {
     status = ADI_IMU_SUCCESS;
+    /* Write the decimation setting to the part if it supports arbitrary rates */
 #if SUPPORTS_ARBITRARY_DEC_RATE
-    
+    status = adi_imu_WriteReg(DECIMATE_REG, ((MAX_DATA_RATE / dataRate) - 1));
+#else
+    //TODO: Figure out what to do  with 2^n
 #endif
-
     return status;
 }
 
@@ -408,13 +419,14 @@ adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct)
     status = ADI_IMU_SUCCESS;
     adi_imu_UnscaledData data;
     status = adi_imu_GetSensorData(&data);
-    #if SUPPORTS_32BIT
-        #if ENABLE_32BIT_DATA
-            // 32-bit scaled data
-        #endif
+    #if SUPPORTS_32BIT & ENABLE_32BIT_DATA
+        // use 32-bit scale factors
+
     #else
-        // 16-bit scaled data
+        // use 16-bit scale factors
+
     #endif
+
     return status;
 }
 #endif
@@ -423,18 +435,87 @@ adi_imu_Status adi_imu_GetSensorData(adi_imu_UnscaledData *data_struct)
 {
     status = ADI_IMU_SUCCESS;
 #if ENABLE_BURST_MODE
-    #if SUPPORTS_32BIT_BURST
-        #if ENABLE_32_BIT_BURST_MODE
-        // 32-bit burst reads
+    #if ENABLE_32_BIT_BURST_MODE & SUPPORTS_32BIT_BURST
+        // TODO: Do I need to write the page ID here?
+        /* Build the tx array */
+        txBuf[0] = (BURST_TRIGGER_REG & 0xFF);
+        txBuf[1] = 0x00;
+        for (uint16_t i = 0; i < BURST_BYTE_LENGTH; i++)
+        {
+            txBuf[i + 2] = 0x00;
+        }
+        /* Transmit txBuf and store the response in rxBuf */
+        status = spi_Transfer(txBuf, rxBuf, (BURST_BYTE_LENGTH + 2), (BURST_BYTE_LENGTH + 2), STALL_TIME_US);
+        /* Push the rxBuf data into the data output struct */
+        #if SUPPORTS_BURST_STATUS
+            data_struct->status = (uint32_t) (IMU_GET_16BITS(rxBuf, STATUS_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if SUPPORTS_BURST_CNT
+            data_struct->count = (uint32_t) (IMU_GET_16BITS(rxBuf, COUNT_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        data_struct->xg = (int32_t) (IMU_GET_32BITS(rxBuf, XG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->yg = (int32_t) (IMU_GET_32BITS(rxBuf, YG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->zg = (int32_t) (IMU_GET_32BITS(rxBuf, ZG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->xa = (int32_t) (IMU_GET_32BITS(rxBuf, XA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->ya = (int32_t) (IMU_GET_32BITS(rxBuf, YA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->za = (int32_t) (IMU_GET_32BITS(rxBuf, ZA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->temperature = (int32_t) (IMU_GET_16BITS(rxBuf, TEMP_OUT_INDEX + BURST_PAYLOAD_OFFSET));
+        #if ENABLE_MAGNETOMETER
+            data_struct->xm = (int32_t) (IMU_GET_16BITS(rxBuf, XM_INDEX + BURST_PAYLOAD_OFFSET));
+            data_struct->ym = (int32_t) (IMU_GET_16BITS(rxBuf, YM_INDEX + BURST_PAYLOAD_OFFSET));
+            data_struct->zm = (int32_t) (IMU_GET_16BITS(rxBuf, ZM_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if ENABLE_BAROMETER
+            data_struct->baro = (int32_t) (IMU_GET_16BITS(rxBuf, BARO_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if SUPPORTS_BURST_CHECKSUM_CRC
+            data_struct->chksm_crc = (uint32_t) (IMU_GET_32BITS(rxBuf, CHECKSUM_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
 
+    #else
+        // TODO: Do I need to write the page ID here?
+        /* Build the tx array */
+        txBuf[0] = (BURST_TRIGGER_REG & 0xFF);
+        txBuf[1] = 0x00;
+        for (uint16_t i = 0; i < BURST_BYTE_LENGTH; i++)
+        {
+            txBuf[i + 2] = 0x00;
+        }
+        /* Transmit txBuf and store the response in rxBuf */
+        status = spi_Transfer(txBuf, rxBuf, (BURST_BYTE_LENGTH + 2), (BURST_BYTE_LENGTH + 2), STALL_TIME_US);
+        /* Push the rxBuf data into the data output struct */
+        #if SUPPORTS_BURST_STATUS
+            data_struct->status = (uint32_t) (IMU_GET_16BITS(rxBuf, STATUS_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if SUPPORTS_BURST_CNT
+            data_struct->count = (uint32_t) (IMU_GET_16BITS(rxBuf, COUNT_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        data_struct->xg = (int32_t) (IMU_GET_16BITS(rxBuf, XG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->yg = (int32_t) (IMU_GET_16BITS(rxBuf, YG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->zg = (int32_t) (IMU_GET_16BITS(rxBuf, ZG_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->xa = (int32_t) (IMU_GET_16BITS(rxBuf, XA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->ya = (int32_t) (IMU_GET_16BITS(rxBuf, YA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->za = (int32_t) (IMU_GET_16BITS(rxBuf, ZA_INDEX + BURST_PAYLOAD_OFFSET));
+        data_struct->temperature = (int16_t) (IMU_GET_16BITS(rxBuf, TEMP_OUT_INDEX + BURST_PAYLOAD_OFFSET));
+        #if ENABLE_MAGNETOMETER
+            data_struct->xm = (int32_t) (IMU_GET_16BITS(rxBuf, XM_INDEX + BURST_PAYLOAD_OFFSET));
+            data_struct->ym = (int32_t) (IMU_GET_16BITS(rxBuf, YM_INDEX + BURST_PAYLOAD_OFFSET));
+            data_struct->zm = (int32_t) (IMU_GET_16BITS(rxBuf, ZM_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if ENABLE_BAROMETER
+            data_struct->baro = (int32_t) (IMU_GET_16BITS(rxBuf, BARO_INDEX + BURST_PAYLOAD_OFFSET));
+        #endif
+        #if SUPPORTS_BURST_CHECKSUM_CRC
+            data_struct->chksm_crc = (uint32_t) (IMU_GET_16BITS(rxBuf, CHECKSUM_INDEX + BURST_PAYLOAD_OFFSET));
         #endif
     #endif
-    // 16-bit burst reads
 #else
-    #if SUPPORTS_32BIT_REGS
+    #if ENABLE_32BIT_DATA & SUPPORTS_32BIT_REGS
         //32-bit regular reads
+    #else
+        // 16-bit regular reads
     #endif
-    // 16-bit regular reads
 #endif
+
     return status;
 }

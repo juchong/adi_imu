@@ -18,6 +18,24 @@ extern "C" {
 
 #include "adi_imu_conf.h"
 
+/* Enable the user-specified IMU header */
+#if ADIS16448
+    #include "adis16448.h" /* ADIS16448 */
+#elif ADIS1646X
+    #include "adis1646x.h" /* ADIS16465, ADIS16467 */
+#elif ADIS1647X
+    #include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
+#elif ADIS1649X
+    #include "adis1649x.h" /* ADIS16495, ADIS16497 */
+#elif ADIS1650X
+    #include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
+#endif
+
+/* Conversion function constants */
+#define IMU_GET_16BITS(buf, idx)    ( ((buf[idx] << 8) & 0xFF00) | (buf[1+idx] & 0xFF) )
+#define IMU_GET_32BITS(buf, idx)    ( (uint32_t)((buf[2+idx] << 24) & 0xFF000000) | (uint32_t)((buf[3+idx] << 16) & 0xFF0000) | (uint32_t)((buf[idx] << 8) & 0xFF00) | (uint32_t)(buf[1+idx] & 0xFF) )
+
+
 /* Boolean typedef */
 typedef enum {
     FALSE = 0,
@@ -80,6 +98,12 @@ typedef enum {
 /* Scaled data struct */
 #if ENABLE_SCALED_DATA
 typedef struct {
+#if SUPPORTS_BURST_STATUS
+    uint32_t status;
+#endif
+#if SUPPORTS_BURST_CNT
+    uint32_t count;
+#endif
     float xg;
     float yg;
     float zg;
@@ -94,6 +118,9 @@ typedef struct {
 #endif
 #if ENABLE_BAROMETER
     float baro;
+#endif
+#if SUPPORTS_BURST_CHECKSUM_CRC
+    uint32_t chksm_crc;
 #endif
     } adi_imu_ScaledData;
 #endif
@@ -134,6 +161,12 @@ typedef struct {
 
 /* Unscaled data struct */
 typedef struct {
+#if SUPPORTS_BURST_STATUS
+    uint32_t status;
+#endif
+#if SUPPORTS_BURST_CNT
+    uint32_t count;
+#endif
     int32_t xg;
     int32_t yg;
     int32_t zg;
@@ -148,6 +181,9 @@ typedef struct {
 #endif
 #if ENABLE_BAROMETER
     int32_t baro;
+#endif
+#if SUPPORTS_BURST_CHECKSUM_CRC
+    uint32_t chksm_crc;
 #endif
 } adi_imu_UnscaledData;
 

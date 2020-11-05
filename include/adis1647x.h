@@ -20,6 +20,9 @@
 #define SUPPORTS_EXTERNAL_SYNC                  1
 #define SUPPORTS_ARBITRARY_DEC_RATE             1
 #define SUPPORTS_RANGE_REG                      1
+#define SUPPORTS_BURST_CHECKSUM_CRC             1
+#define SUPPORTS_BURST_CNT                      1
+#define SUPPORTS_BURST_STATUS                   1
 
 /* Family-specific timing parameters */
 #define STALL_TIME_US                           16
@@ -49,43 +52,42 @@
 
 /* Component-specific scale factors */
 #if ENABLE_SCALED_DATA
-  #if SUPPORTS_32BIT
-    #if ENABLE_32BIT_DATA
-      #define GYRO_32BIT_SCALE_125                (float) 10485760
-      #define GYRO_32BIT_SCALE_500                (float) 2621440
-      #define GYRO_32BIT_SCALE_2000               (float) 655360
-      #define ACCEL_32BIT_SCALE_8G                (float) 262144000
-      #define ACCEL_32BIT_SCALE_40G               (float) 52428800
-    #endif
+  /* Enable 32-bit scale factors if either the burst or regular reads support it */
+  #if SUPPORTS_32BIT_REGS | SUPPORTS_32BIT_BURST
+    #define GYRO_32BIT_SCALE_125                (float) 10485760
+    #define GYRO_32BIT_SCALE_500                (float) 2621440
+    #define GYRO_32BIT_SCALE_2000               (float) 655360
+    #define ACCEL_32BIT_SCALE_8G                (float) 262144000
+    #define ACCEL_32BIT_SCALE_40G               (float) 52428800
   #endif
-
+  /* 16-bit scale factors always enabled if scaled data is enabled */
   #define GYRO_16BIT_SCALE_125                    (float) 160
   #define GYRO_16BIT_SCALE_500                    (float) 40
   #define GYRO_16BIT_SCALE_2000                   (float) 10
   #define ACCEL_16BIT_SCALE_8G                    (float) 4000
   #define ACCEL_16BIT_SCALE_40G                   (float) 800
-
   #define TEMPERATURE_SCALE                       (float) 10
   #define TEMPERATURE_OFFSET                      (float) 0
 #endif
 
 /* Burst mode-specific definitions */
-#if ENABLE_BURST_MODE
-  #if SUPPORTS_BURST
+#if SUPPORTS_BURST
+  #if ENABLE_BURST_MODE
     #define BURST_TRIGGER_REG                   GLOB_CMD
     #define BURST_BYTE_LENGTH                   20
+    #define BURST_PAYLOAD_OFFSET                2
 
-    /* Burst message definition */
-    #define DIAG_STAT_INDEX                     0
-    #define XG_INDEX                            1
-    #define YG_INDEX                            2
-    #define ZG_INDEX                            3
-    #define XA_INDEX                            4
-    #define YA_INDEX                            5
-    #define ZA_INDEX                            6
-    #define TEMP_OUT_INDEX                      7
-    #define DATA_CNTR_INDEX                     8
-    #define CHECKSUM_INDEX                      9
+    /* 16-bit Burst message definition */
+    #define STATUS_INDEX                        0
+    #define XG_INDEX                            2
+    #define YG_INDEX                            4
+    #define ZG_INDEX                            6
+    #define XA_INDEX                            8
+    #define YA_INDEX                            10
+    #define ZA_INDEX                            12
+    #define TEMP_OUT_INDEX                      14
+    #define COUNT_INDEX                         16
+    #define CHECKSUM_INDEX                      18
   #endif
 #endif
 
