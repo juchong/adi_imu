@@ -19,7 +19,15 @@
 #define SUPPORTS_EXTERNAL_SYNC                  1
 #define SUPPORTS_ARBITRARY_DEC_RATE             1
 #define SUPPORTS_RANGE_REG                      1
+
+/* Family-specific timing parameters */
 #define STALL_TIME_US                           16
+#define POWER_ON_TIME_MS                        252
+#define RESET_RECOVERY_TIME_MS                  193
+#define FACTORY_CAL_RESTORE_TIME_MS             142
+#define FLASH_MEMORY_BACKUP_TIME_MS             72
+#define FLASH_MEMORY_TEST_TIME_MS               32
+#define SELF_TEST_TIME_MS                       14
 
 /* Component-specific register locations */
 #define SCRATCH_REG                             USER_SCR1
@@ -39,20 +47,26 @@
 #endif
 
 /* Component-specific scale factors */
-#define GYRO_16BIT_SCALE_125                    (float) 160
-#define GYRO_16BIT_SCALE_500                    (float) 40
-#define GYRO_16BIT_SCALE_2000                   (float) 10
-#define ACCEL_16BIT_SCALE_8G                    (float) 4000
-#define ACCEL_16BIT_SCALE_40G                   (float) 800
+#if ENABLE_SCALED_DATA
+  #define GYRO_16BIT_SCALE_125                    (float) 160
+  #define GYRO_16BIT_SCALE_500                    (float) 40
+  #define GYRO_16BIT_SCALE_2000                   (float) 10
+  #define ACCEL_16BIT_SCALE_8G                    (float) 4000
+  #define ACCEL_16BIT_SCALE_40G                   (float) 800
 
-#define GYRO_32BIT_SCALE_125                    (float) 10485760
-#define GYRO_32BIT_SCALE_500                    (float) 2621440
-#define GYRO_32BIT_SCALE_2000                   (float) 655360
-#define ACCEL_32BIT_SCALE_8G                    (float) 262144000
-#define ACCEL_32BIT_SCALE_40G                   (float) 52428800
+  #if SUPPORTS_32BIT
+    #if ENABLE_32BIT_DATA
+      #define GYRO_32BIT_SCALE_125                (float) 10485760
+      #define GYRO_32BIT_SCALE_500                (float) 2621440
+      #define GYRO_32BIT_SCALE_2000               (float) 655360
+      #define ACCEL_32BIT_SCALE_8G                (float) 262144000
+      #define ACCEL_32BIT_SCALE_40G               (float) 52428800
+    #endif
+  #endif
 
-#define TEMPERATURE_SCALE                       (float) 10
-#define TEMPERATURE_OFFSET                      (float) 0
+  #define TEMPERATURE_SCALE                       (float) 10
+  #define TEMPERATURE_OFFSET                      (float) 0
+#endif
 
 /* Burst mode-specific definitions */
 #if ENABLE_BURST_MODE

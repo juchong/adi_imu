@@ -16,6 +16,7 @@ extern void delay_MS(uint32_t milliseconds);
 static uint8_t txBuf[SPI_BUFF_SIZE];
 static uint8_t rxBuf[SPI_BUFF_SIZE];
 static adi_imu_Status status = ADI_IMU_SUCCESS;
+static uint16_t tempRegA, tempRegB;
 
 
 adi_imu_Status adi_imu_Init() 
@@ -75,6 +76,7 @@ adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val)
     return status;
 }
 
+
 /** 
  * @brief Read a single register from the IMU
  * 
@@ -128,6 +130,8 @@ adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val)
  * 
  * @param numRegs The number of registers contained in the array of registers
  * 
+ * @param timesToRead The number of times to read the register list
+ * 
  * @return A status code indicating the success of the SPI transaction
  * 
  * This function reads an arbitrary array of registers and returns an array of data corresponding to the 
@@ -137,7 +141,7 @@ adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val)
  * A page write is always inserted at the beginning of the array read. Any extra SPI writes are automatically 
  * parsed out of the resultant data array.
  **/
-adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs)
+adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs, uint16_t timesToRead)
 {
 
 #if SUPPORTS_PAGES
@@ -231,23 +235,98 @@ adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, 
 
 }
 
+
+/** 
+ * @brief Executes the IMU flash memory backup routine.
+ * 
+ * @return A status code indicating the success of the SPI transaction
+ * 
+ * This function writes the correct bit into the IMU command register to execute the flash memory backup routine.
+ * This routine stores the settings located in the IMU's volatile memory into non-volatile memory to be recalled
+ * next time the device is restarted.   
+ **/
 adi_imu_Status adi_imu_FlashUpdate()
 {
+    /* Clear status flag */
+    status = ADI_IMU_SUCCESS;
+    /* Set the flash update bit in the command register */
+    status = adi_imu_WriteReg(COMMAND_REG, BITM_COMMAND_REG_FLASH_MEM_UPD);
+    /* Wait for the execution time specified in the datasheet */
+    delay_MS(FLASH_MEMORY_BACKUP_TIME_MS);
+
+#if CHECK_COMS_AFTER_COMMAND
+    adi_imu_CheckComs();
+#endif
+
     return status;
 }
 
+/** 
+ * @brief Executes the IMU software reset routine.
+ * 
+ * @return A status code indicating the success of the SPI transaction
+ * 
+ * This function writes the correct bit into the IMU command register to trigger a software reset. 
+ **/
 adi_imu_Status adi_imu_SoftwareReset()
 {
+    /* Clear status flag */
+    status = ADI_IMU_SUCCESS;
+    /* Set the software reset bit in the command register */
+    status = adi_imu_WriteReg(COMMAND_REG, BITM_COMMAND_REG_SOFTWARE_RST);
+    /* Wait for the execution time specified in the datasheet */
+    delay_MS(RESET_RECOVERY_TIME_MS);
+
+#if CHECK_COMS_AFTER_COMMAND
+    adi_imu_CheckComs();
+#endif
+
     return status;
 }
 
 adi_imu_Status adi_imu_SetDataRate(uint16_t dataRate)
 {
+    status = ADI_IMU_SUCCESS;
+#if SUPPORTS_ARBITRARY_DEC_RATE
+    
+#endif
+
     return status;
 }
 
+/** 
+ * @brief Checks whether SPI communication with the IMU is operational.
+ * 
+ * @return A status code indicating the success of the subroutine
+ * 
+ * This function reads the contents of the first scratch register, temporarily stores it in memory,
+ * writes a known value to the scratch register, reads that value back, and if successful, re-writes the
+ * original value into the scratch register. 
+ **/
 adi_imu_Status adi_imu_CheckComs()
 {
+    status = ADI_IMU_SUCCESS;
+    status = adi_imu_ReadReg(SCRATCH_REG, tempRegA);
+    if (status != ADI_IMU_SUCCESS)
+    {
+        return status;
+    }
+    status = adi_imu_WriteReg(SCRATCH_REG, 0xA5A5);
+    if (status != ADI_IMU_SUCCESS)
+    {
+        return status;
+    }
+    status = adi_imu_ReadReg(SCRATCH_REG,tempRegB);
+    if (status != ADI_IMU_SUCCESS)
+    {
+        return status;
+    }
+    if (tempRegB != 0xA5A5)
+    {
+        return ADI_IMU_CHECK_SPI_COMS_FAILED;
+    }
+    status = adi_imu_WriteReg(SCRATCH_REG, tempRegA);
+
     return status;
 }
 

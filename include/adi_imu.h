@@ -84,6 +84,7 @@ typedef enum {
     ADI_IMU_PRODID_VERIFY_FAILED,           /* (2) Product ID read from the device does not match the compiled library */
     ADI_IMU_INVALID_DATA_RATE,              /* (3) An invalid data rate was requested */
     ADI_IMU_BURST_NOT_SUPPORTED,            /* (4) The selected IMU configuration does not support burst data capture */
+    ADI_IMU_CHECK_SPI_COMS_FAILED,          /* (5) The SPI communication verification routine failed to read back valid data */
 } adi_imu_Status;
 
 /* Scaled data struct */
@@ -167,7 +168,7 @@ adi_imu_Status adi_imu_Init();
 adi_imu_Status adi_imu_WriteReg(uint16_t pageIDRegAddr, uint16_t val);
 
 /* Read several IMU registers at once */
-adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs);
+adi_imu_Status adi_imu_ReadRegArray(const uint16_t *regList, uint16_t *outData, uint16_t numRegs, uint16_t timesToRead);
 
 /* Read a single IMU register */
 adi_imu_Status adi_imu_ReadReg(uint16_t pageIDRegAddr, uint16_t *val);
@@ -187,17 +188,21 @@ adi_imu_Status adi_imu_CheckComs();
 /* Update device info/state */
 adi_imu_Status adi_imu_GetDeviceInfo(adi_imu_DeviceInfo *data_info);
 
-/* Set the active register page */
-adi_imu_Status adi_imu_SetActivePage(uint16_t page);
+#if SUPPORTS_PAGES
+    /* Set the active register page */
+    adi_imu_Status adi_imu_SetActivePage(uint16_t page);
 
-/* Get the active register page */
-adi_imu_Status adi_imu_GetActivePage(uint16_t *active_page);
-
-/* Trigger a read of the inertial data and populate the scaled data struct */
-adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct);
+    /* Get the active register page */
+    adi_imu_Status adi_imu_GetActivePage(uint16_t *active_page);
+#endif
 
 /* Trigger a read of the inertial data and populate the unscaled data struct */
 adi_imu_Status adi_imu_GetSensorData(adi_imu_UnscaledData *data_struct);
+
+#if ENABLE_SCALED_DATA
+    /* Trigger a read of the inertial data and populate the scaled data struct */
+    adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct);
+#endif
 
 #ifdef __cplusplus
 }

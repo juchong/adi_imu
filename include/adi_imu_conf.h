@@ -42,9 +42,14 @@
 
 
 /**
+ * Perform an IMU communications check after executing any subroutine.
+ **/
+#define CHECK_COMS_AFTER_COMMAND          1
+
+
+/**
  * Set the tx and rx buffer size. Used for managing SPI transactions.
  **/
 #define SPI_BUFF_SIZE                     64
-
 
 #endif
