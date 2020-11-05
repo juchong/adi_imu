@@ -11,8 +11,9 @@
 /* Device and family-specific definitions and configurations */
 #define ENABLE_MAGNETOMETER                     0
 #define ENABLE_BAROMETER                        0
-#define SUPPORTS_32BIT                          1
+#define SUPPORTS_32BIT_REGS                     1
 #define SUPPORTS_BURST                          1
+#define SUPPORTS_32BIT_BURST                    0
 #define SUPPORTS_PAGES                          0
 #define MAX_DATA_RATE                           2000
 #define SUPPORTS_PPS                            1
@@ -48,12 +49,6 @@
 
 /* Component-specific scale factors */
 #if ENABLE_SCALED_DATA
-  #define GYRO_16BIT_SCALE_125                    (float) 160
-  #define GYRO_16BIT_SCALE_500                    (float) 40
-  #define GYRO_16BIT_SCALE_2000                   (float) 10
-  #define ACCEL_16BIT_SCALE_8G                    (float) 4000
-  #define ACCEL_16BIT_SCALE_40G                   (float) 800
-
   #if SUPPORTS_32BIT
     #if ENABLE_32BIT_DATA
       #define GYRO_32BIT_SCALE_125                (float) 10485760
@@ -63,6 +58,12 @@
       #define ACCEL_32BIT_SCALE_40G               (float) 52428800
     #endif
   #endif
+
+  #define GYRO_16BIT_SCALE_125                    (float) 160
+  #define GYRO_16BIT_SCALE_500                    (float) 40
+  #define GYRO_16BIT_SCALE_2000                   (float) 10
+  #define ACCEL_16BIT_SCALE_8G                    (float) 4000
+  #define ACCEL_16BIT_SCALE_40G                   (float) 800
 
   #define TEMPERATURE_SCALE                       (float) 10
   #define TEMPERATURE_OFFSET                      (float) 0

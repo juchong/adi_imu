@@ -18,19 +18,6 @@ extern "C" {
 
 #include "adi_imu_conf.h"
 
-/* Enable the user-specified IMU header */
-#if ADIS16448
-    #include "adis16448.h" /* ADIS16448 */
-#elif ADIS1646X
-    #include "adis1646x.h" /* ADIS16465, ADIS16467 */
-#elif ADIS1647X
-    #include "adis1647x.h" /* ADIS16470, ADIS16475, ADIS16477 */
-#elif ADIS1649X
-    #include "adis1649x.h" /* ADIS16495, ADIS16497 */
-#elif ADIS1650X
-    #include "adis1650x.h" /* ADIS16500, ADIS16505, ADIS16507 */
-#endif
-
 /* Boolean typedef */
 typedef enum {
     FALSE = 0,
@@ -57,24 +44,27 @@ typedef enum {
     DIO4 = 3
 } adi_imu_DatRdyGPIO;
 
-/* IMU clock mode */
+/* IMU range register */
 typedef enum {
-    INTERNAL_SYNC = 0,
-    DIRECT_SYNC = 1,
-    SCALED_SYNC = 2
-} adi_imu_ClkMode;
+    RANGE_125DPS = 0,
+    RANGE_500DPS = 4,
+    RANGE_2000DPS = 12
+} adi_imu_RangeReg;
 
 /* IMU device information struct */
 typedef struct {
     uint16_t prodId;
     uint16_t fwRev;
-    uint16_t fwDay;
-    uint16_t fwMonth;
+    uint16_t fwDayMonth;
     uint16_t fwYear;
     uint16_t serialNumber;
-    uint16_t pageId;
     uint16_t decRate;
-    uint16_t clkMode;
+#if SUPPORTS_PAGES
+    uint16_t activePageId;
+#endif
+#if SUPPORTS_RANGE_REG
+    adi_imu_RangeReg range;
+#endif
 } adi_imu_DeviceInfo;
 
 /** Enum of library errors */
@@ -125,7 +115,7 @@ typedef struct {
 
 /* Target 32-bit scale factors */
 #if ENABLE_SCALED_DATA
-    #if SUPPORTS_32BIT
+    #if SUPPORTS_32BIT_REGS
         #if ENABLE_32BIT_DATA
         typedef struct {
             float gyro32Scale;

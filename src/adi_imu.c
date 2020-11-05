@@ -18,21 +18,16 @@ static uint8_t rxBuf[SPI_BUFF_SIZE];
 static adi_imu_Status status = ADI_IMU_SUCCESS;
 static uint16_t tempRegA, tempRegB;
 
-
+/** 
+ * @brief IMU initialization routine.
+ * 
+ * @return A status code indicating the success of the subroutine.
+ * 
+ * This function performs IMU initialization tasks.
+ **/
 adi_imu_Status adi_imu_Init() 
 {
     status = adi_imu_CheckComs();
-
-#if SUPPORTS_PAGES
-    if (status == ADI_IMU_SUCCESS)
-    {
-        status = adi_imu_GetActivePage(activePage);
-        if (status == ADI_IMU_SUCCESS)
-        {
-            pageValid = TRUE;
-        }
-    }
-#endif
 
     return status;
 }
@@ -306,7 +301,7 @@ adi_imu_Status adi_imu_SetDataRate(uint16_t dataRate)
 adi_imu_Status adi_imu_CheckComs()
 {
     status = ADI_IMU_SUCCESS;
-    status = adi_imu_ReadReg(SCRATCH_REG, tempRegA);
+    status = adi_imu_ReadReg(SCRATCH_REG, &tempRegA);
     if (status != ADI_IMU_SUCCESS)
     {
         return status;
@@ -316,7 +311,7 @@ adi_imu_Status adi_imu_CheckComs()
     {
         return status;
     }
-    status = adi_imu_ReadReg(SCRATCH_REG,tempRegB);
+    status = adi_imu_ReadReg(SCRATCH_REG, &tempRegB);
     if (status != ADI_IMU_SUCCESS)
     {
         return status;
@@ -330,27 +325,116 @@ adi_imu_Status adi_imu_CheckComs()
     return status;
 }
 
+/** 
+ * @brief Get the IMU gyroscope range.
+ * 
+ * @return A status code indicating the success of the subroutine.
+ * 
+ * This function reads the range register if the IMU supports it.
+ **/
+#if SUPPORTS_RANGE_REG
+static adi_imu_Status adi_imu_GetSensorRange(adi_imu_RangeReg *range_data)
+{
+    status = ADI_IMU_SUCCESS;
+    status = adi_imu_ReadReg(RANGE_REG, &tempRegA);
+    tempRegA = tempRegA & 0x000C;
+    *range_data = tempRegA;
+
+    return status;
+}
+#endif
+
+/** 
+ * @brief Gets the IMU metadata from several IMU registers.
+ * 
+ * @return A status code indicating the success of the subroutine.
+ * 
+ * This function reads the contents of several IMU registers and compiles them in a single enum.
+ **/
 adi_imu_Status adi_imu_GetDeviceInfo(adi_imu_DeviceInfo *data_info)
 {
+    status = ADI_IMU_SUCCESS;
+    status = adi_imu_ReadReg(PRODUCT_ID_REG, &data_info->prodId);
+    status = adi_imu_ReadReg(FIRMWARE_REV_REG, &data_info->fwRev);
+    status = adi_imu_ReadReg(FIRMWARE_DATE_MONTH_REG, &data_info->fwDayMonth);
+    status = adi_imu_ReadReg(FIRMWARE_YEAR_REG, &data_info->fwYear);
+    status = adi_imu_ReadReg(SERIAL_NUMBER_REG, &data_info->serialNumber);
+    status = adi_imu_ReadReg(DECIMATE_REG, &data_info->decRate);
+#if SUPPORTS_PAGES
+    status = adi_imu_ReadReg(PAGE_ID_REG, &data_info->activePageId);
+#endif
+#if SUPPORTS_RANGE_REG
+    status = adi_imu_GetSensorRange(&data_info->range);
+#endif
+
     return status;
 }
 
+/** 
+ * @brief Sets the active IMU page if the IMU supports it.
+ * 
+ * @return A status code indicating the success of the subroutine.
+ * 
+ * This function sets the active IMU page.
+ **/
+#if SUPPORTS_PAGES
 adi_imu_Status adi_imu_SetActivePage(uint16_t page)
 {
+    status = ADI_IMU_SUCCESS;
+    status = adi_imu_WriteReg(PAGE_ID_REG, page);
     return status;
 }
+#endif
 
+/** 
+ * @brief Gets the active IMU page if the IMU supports it.
+ * 
+ * @return A status code indicating the success of the subroutine.
+ * 
+ * This function gets the active IMU page.
+ **/
+#if SUPPORTS_PAGES
 adi_imu_Status adi_imu_GetActivePage(uint16_t *active_page)
 {
+    status = ADI_IMU_SUCCESS;
+    status = adi_imu_ReadReg(PAGE_ID_REG, active_page);
     return status;
 }
+#endif
 
+#if ENABLE_SCALED_DATA
 adi_imu_Status adi_imu_GetScaledSensorData(adi_imu_ScaledData *data_struct)
 {
+    status = ADI_IMU_SUCCESS;
+    adi_imu_UnscaledData data;
+    status = adi_imu_GetSensorData(&data);
+    #if SUPPORTS_32BIT
+        #if ENABLE_32BIT_DATA
+            // 32-bit scaled data
+        #endif
+    #else
+        // 16-bit scaled data
+    #endif
     return status;
 }
+#endif
 
 adi_imu_Status adi_imu_GetSensorData(adi_imu_UnscaledData *data_struct)
 {
+    status = ADI_IMU_SUCCESS;
+#if ENABLE_BURST_MODE
+    #if SUPPORTS_32BIT_BURST
+        #if ENABLE_32_BIT_BURST_MODE
+        // 32-bit burst reads
+
+        #endif
+    #endif
+    // 16-bit burst reads
+#else
+    #if SUPPORTS_32BIT_REGS
+        //32-bit regular reads
+    #endif
+    // 16-bit regular reads
+#endif
     return status;
 }
